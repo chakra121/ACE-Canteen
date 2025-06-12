@@ -1,0 +1,368 @@
+You are absolutely right! My apologies for the oversight. I will correct the User Project Requirement Document (PRD) to reflect that there is only an Admin account and that students can place orders from both the app and the website.
+
+Here is the revised PRD:
+
+User Project Requirement Document: Canteen Management System (Revised)
+
+1. Introduction
+
+1.1 Purpose: This document outlines the requirements for a canteen management system consisting of an Android app and a website. Students can use either the app or the website to browse the menu, place orders, and track order status. The administrator will use the website to manage the canteen operations.
+
+1.2 Goals:
+
+Improve canteen efficiency in order management.
+
+Provide a convenient ordering system for students.
+
+Centralize canteen management.
+
+1.3 Target Audience:
+
+Students: Use the Android app or the website to browse the menu, place orders, and track order status.
+
+Admin: Use the website to manage the canteen operations.
+
+1.4 Scope:
+
+Included: Menu browsing, online ordering, order processing, inventory tracking, reporting, user authentication, admin panel.
+
+Excluded: Delivery management, integration with the college's accounting system, SMS notifications for students or staff, push notifications on website
+
+1.5 Assumptions:
+
+All students have access to smartphones with Android 9 or later or computers with modern web browsers.
+
+The canteen has reliable internet access.
+
+1.6 Constraints:
+
+The project is for study purposes, with limited time and resources.
+
+1.7 Success Criteria:
+
+Online orders are successful.
+
+Admin can efficiently manage menu and orders through the website.
+
+2. User Requirements
+
+2.1 Student (Android App and Website)
+
+2.1.1 Menu Browsing:
+
+Display the menu in categories (e.g., Breakfast, Lunch, Snacks, Beverages).
+
+Display a green dot next to vegetarian items and a red dot next to non-vegetarian items.
+
+Display images for each menu item.
+
+Display a list of ingredients for each menu item.
+
+Allow searching the menu by category.
+
+2.1.2 Cart Management:
+
+Provide an "Add to Cart" button for each menu item.
+
+Allow adjusting the quantity of items in the cart (both on the menu item listing and in the cart view).
+
+Provide a dedicated cart page for checkout.
+
+Provide a floating mini-cart to view added items and quickly navigate to the full cart.
+
+Synchronize cart items across devices (if the user is logged in).
+
+2.1.3 Ordering:
+
+Offer "Cash" and "Online Payment (Razorpay - test mode)" options.
+
+Provide options for "Dine-In" and "Take Away".
+
+2.1.4 Order Tracking:
+
+Display order status: "Order Placed," "Preparing," "Ready to Pickup," "Completed."
+
+Push notifications (FCM) to the mobile app for "Order Placed" (with payment details) and "Ready to Pickup" (with items ordered). (Android app only)
+
+2.1.5 Account Management:
+
+Allow users to manage their Name, Email (unique), Roll Number (unique), Phone Number (unique), and Password.
+
+2.1.6 Feedback:
+
+Allow users to rate menu items using a star rating system.
+
+Store order history, if completed then only keep it
+
+2.2 Admin (Website)
+
+2.2.1 Menu Management:
+
+CRUD (Create, Read, Update, Delete) operations on menu items.
+
+Editable fields: Name, Price, Category, Image (from a predefined list), Ingredients, inStock (boolean).
+
+Create and manage menu categories.
+
+Schedule menu items for specific times of the day (e.g., breakfast items only available in the morning).
+
+Mark menu items as "in-stock" or "out-of-stock." Only "in-stock" items are visible to students.
+
+Select images from a limited set of images stored in Firebase Storage (referenced by image name/URL).
+
+2.2.2 Order Processing:
+
+Website will have a dedicated button that you click for the new order statuses, instead of the web side getting order statuses automatically.
+
+2.2.3 Inventory Management:
+
+Track inventory levels for items by using an inStock field.
+
+2.2.4 Reporting and Analytics:
+
+Generate a daily report with:
+
+Total revenue
+
+Revenue by category (with pie chart)
+
+Total number of orders
+
+Average order size
+
+Most ordered items
+
+Least ordered items
+
+Pie chart of Veg/Non-Veg orders
+
+2.2.5 Settings and Configuration:
+
+Configure canteen hours.
+
+3. Page Flow and Functionality
+
+3.1 Android App (Student)
+
+3.1.1 Splash Screen: Displays the app logo and name.
+
+3.1.2 Authentication:
+
+Login: Existing users enter their email/phone and password.
+
+Registration: New users provide their Name, Email, Roll Number, Phone Number, and Password. The system validates email/phone uniqueness.
+
+3.1.3 Main Menu:
+
+Displays the menu categories.
+
+Displays menu items in each category with image, name, ingredients, price, and "Add to Cart" button.
+
+Search bar for category search.
+
+floating action button for mini-cart popup to see the added items and can navigate to the cart page.
+
+3.1.4 Cart:
+
+Lists items added to the cart with quantity selection.
+
+Displays subtotal, tax, and total amount.
+
+"Dine-In" or "Take Away" selection.
+
+Payment method selection (Cash or Razorpay).
+
+"Confirm Order" button.
+
+3.1.5 Order Tracking:
+
+Displays the status of the current order and a history of past orders.
+
+3.1.6 Profile:
+
+Allows users to view and edit their profile information (Name, Email, Roll Number, Phone Number, Password).
+
+3.1.7 Rating:
+
+Displays the rating page and provides the start rating to the items that are there in the manu
+
+3.2 Website (Student)
+
+3.2.1 Authentication:
+
+Login: Existing users enter their email/phone and password.
+
+Registration: New users provide their Name, Email, Roll Number, Phone Number, and Password. The system validates email/phone uniqueness.
+
+3.2.2 Main Menu:
+
+Displays the menu categories.
+
+Displays menu items in each category with image, name, ingredients, price, and "Add to Cart" button.
+
+Search bar for category search.
+
+3.2.3 Cart:
+
+Lists items added to the cart with quantity selection.
+
+Displays subtotal, tax, and total amount.
+
+"Dine-In" or "Take Away" selection.
+
+Payment method selection (Cash or Razorpay).
+
+"Confirm Order" button.
+
+3.2.4 Order Tracking:
+
+Displays the status of the current order and a history of past orders.
+
+3.2.5 Profile:
+
+Allows users to view and edit their profile information (Name, Email, Roll Number, Phone Number, Password).
+
+3.2.6 Rating:
+
+Displays the rating page and provides the start rating to the items that are there in the manu
+
+3.3 Website (Admin)
+
+3.3.1 Login: Admin logs in with email and password.
+
+3.3.2 Dashboard:
+
+Displays incoming orders.
+
+Displays a summary of key metrics (e.g., total revenue, number of orders).
+
+3.3.3 Menu Management:
+
+Allows adding, editing, and deleting menu items.
+
+Provides fields for name, price, category, image selection (dropdown list), ingredients, and "in-stock" status.
+
+Allows managing menu categories.
+
+Allows scheduling menu items for specific times.
+
+3.3.4 Order Management:
+
+Website will have a dedicated button that you click for the new order statuses, instead of the web side getting order statuses automatically.
+
+3.3.5 Inventory Management:
+
+Simple "in-stock" / "out-of-stock" management for menu items.
+
+3.3.6 Reporting:
+
+Generates a daily report (as specified in section 2.2.4) with options to export the data.
+
+Shows a click able button on report the report can be genarated by clicking on the generate
+
+3.3.7Settings:
+
+Canteen Hours
+
+4. Technical Requirements
+
+4.1 Platform Compatibility:
+
+Android App: Android 9 (API level 28) and above.
+
+Website: Supports all modern web browsers (Chrome, Firefox, Safari, Edge).
+
+4.2 Security:
+
+Use Firebase Authentication to manage user accounts.
+
+Implement server-side validation to ensure data integrity.
+
+Restrict access to sensitive data based on user roles (Admin only for certain functions).
+
+4.3 Performance:
+
+Response time/loading time should be between 200 milliseconds and 4 seconds.
+
+Handle a maximum of 10 concurrent users.
+
+4.4 Integration:
+
+Razorpay integration (in test mode) for online payments.
+
+4.5 Deployment:
+
+Website: Vercel
+
+Android App: APK from Github
+
+4.6 Technology Stack:
+
+Database: Cloud Firestore
+
+Android App: Android Studio, Java
+
+Website: Next.js, TypeScript, Tailwind CSS, Shadcn/UI
+
+Authentication: Firebase Authentication
+
+5. Non-Functional Requirements
+
+5.1 Usability: The system should be easy to use for both students and the admin, with a user-friendly interface similar to food delivery apps.
+
+5.2 Reliability: NA
+
+5.3 Availability: The system should be available 24/7, but orders will only be accepted during canteen hours.
+
+5.4 Maintainability: The project is for learning purposes, so maintainability is not a primary concern.
+
+5.5 Portability: Yes, the system should be easy to move to a different platform or hosting environment.
+
+5.6 Scalability: NA
+
+6. Database Design (Cloud Firestore)
+
+// Example using Cloud Firestore
+collections:
+  users:  // Stores user data
+    - document: { userId: "...", name: "...", email: "...", rollNumber: "...", phoneNumber: "...", role: "student" | "admin" }
+
+  menu_items: // Stores menu item data
+    - document: { itemId: "...", name: "...", description: "...", price: 5.00, category: "Beverage", imageUrl: "...", inStock: true | false }
+
+  orders:  // Stores order data
+    - document: { orderId: "...", userId: "...", rollNumber: "...",orderDate: "...", totalAmount: 15.00, paymentMethod: "cash" | "online", status: "pending" | "preparing" | "ready" | "completed",
+                  items: [
+                      { itemId: "item1", quantity: 2 },
+                      { itemId: "item2", quantity: 1 }
+                  ]
+               }
+
+
+7. Wireframes/Mockups (Highly Recommended)
+
+It's highly recommended to create wireframes or mockups of the key pages in both the Android app and the website. This will help visualize the user interface and ensure that the system meets the user's needs. (This is beyond the scope of this PRD generation, but it's a critical step.)
+
+8. Future Enhancements (Out of Scope for Initial Project)
+
+Integration with the college's student information system.
+
+Advanced inventory management with automated alerts.
+
+Customer loyalty programs.
+
+Detailed sales analytics and reporting.
+
+This concludes the User Project Requirement Document for the Canteen Management System. This document should serve as a guide for the development and testing of the system. Remember to consult this document throughout the development process and update it as needed.
+
+Important Next Steps:
+
+Review the PRD Carefully: Read through the entire document to ensure that you understand all of the requirements and that it accurately reflects your vision for the system.
+
+Create Wireframes/Mockups: Create wireframes or mockups of the key pages in both the Android app and the website. This will help you visualize the user interface and identify any potential usability issues.
+
+Break Down Tasks: Break down the development process into smaller, manageable tasks.
+
+Start Coding! Begin developing the Android app and website, following the requirements outlined in this document.
+
+Good luck with your project!
