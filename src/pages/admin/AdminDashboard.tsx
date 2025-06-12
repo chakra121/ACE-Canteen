@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RefreshCw, DollarSign, ShoppingBag, Users, TrendingUp } from 'lucide-react';
+import { RefreshCw, DollarSign, ShoppingBag, Users, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -29,6 +29,8 @@ const AdminDashboard = () => {
     pendingOrders: 0,
     avgOrderValue: 0
   });
+
+  const statusFlow = ['Order Placed', 'Preparing', 'Ready to Pickup', 'Completed'];
 
   const loadOrders = () => {
     const allOrders = JSON.parse(localStorage.getItem('aceCanteenOrders') || '[]');
@@ -76,16 +78,21 @@ const AdminDashboard = () => {
   };
 
   const getNextStatus = (currentStatus: string) => {
-    switch (currentStatus) {
-      case 'Order Placed':
-        return 'Preparing';
-      case 'Preparing':
-        return 'Ready to Pickup';
-      case 'Ready to Pickup':
-        return 'Completed';
-      default:
-        return currentStatus;
-    }
+    const currentIndex = statusFlow.indexOf(currentStatus);
+    return currentIndex < statusFlow.length - 1 ? statusFlow[currentIndex + 1] : currentStatus;
+  };
+
+  const getPreviousStatus = (currentStatus: string) => {
+    const currentIndex = statusFlow.indexOf(currentStatus);
+    return currentIndex > 0 ? statusFlow[currentIndex - 1] : currentStatus;
+  };
+
+  const canMoveNext = (status: string) => {
+    return statusFlow.indexOf(status) < statusFlow.length - 1;
+  };
+
+  const canMovePrevious = (status: string) => {
+    return statusFlow.indexOf(status) > 0;
   };
 
   return (
@@ -164,14 +171,27 @@ const AdminDashboard = () => {
                       <Badge className={getStatusColor(order.status)}>
                         {order.status}
                       </Badge>
-                      {order.status !== 'Completed' && (
-                        <Button
-                          size="sm"
-                          onClick={() => updateOrderStatus(order.id, getNextStatus(order.status))}
-                        >
-                          Update Status
-                        </Button>
-                      )}
+                      <div className="flex items-center space-x-1">
+                        {canMovePrevious(order.status) && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateOrderStatus(order.id, getPreviousStatus(order.status))}
+                            title={`Move back to ${getPreviousStatus(order.status)}`}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {canMoveNext(order.status) && (
+                          <Button
+                            size="sm"
+                            onClick={() => updateOrderStatus(order.id, getNextStatus(order.status))}
+                            title={`Move forward to ${getNextStatus(order.status)}`}
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                   
