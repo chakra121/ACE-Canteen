@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface RegisterFormProps {
   onToggleMode: () => void;
@@ -20,8 +20,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
     password: ''
   });
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, loginWithGoogle, user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -40,10 +41,38 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
         title: "Success",
         description: "Account created successfully!",
       });
+      navigate(user?.role === "admin" ? "/admin" : "/menu");
     } catch (error) {
       toast({
         title: "Error",
         description: "Registration failed. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    setLoading(true);
+    try {
+      const status = await loginWithGoogle();
+      toast({
+        title: "Google Sign-In Success",
+        description: status === 'new'
+          ? 'Welcome! Please complete your registration.'
+          : 'Welcome back!',
+      });
+
+      if (status === "new") {
+        navigate("/complete-registration");
+      } else {
+        navigate(user?.role === "admin" ? "/admin" : "/menu");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Google sign-in failed.",
         variant: "destructive",
       });
     } finally {
@@ -121,6 +150,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
         <CardFooter className="flex flex-col space-y-2">
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Creating Account...' : 'Create Account'}
+          </Button>
+          <Button type="button" onClick={handleGoogleSignup} variant="outline" className="w-full">
+            {loading ? 'Please wait...' : 'Sign up with Google'}
           </Button>
           <Button type="button" variant="ghost" onClick={onToggleMode}>
             Already have an account? Sign in

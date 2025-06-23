@@ -17,6 +17,7 @@ import AdminReports from "./pages/admin/AdminReports";
 import AdminSettings from "./pages/admin/AdminSettings";
 import Navbar from "./components/Navbar";
 import NotFound from "./pages/NotFound";
+import CompleteGoogleRegistration from "./pages/CompleteGoogleRegistration";
 
 const queryClient = new QueryClient();
 
@@ -49,21 +50,103 @@ const AppRoutes = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <Routes>
-        <Route path="/auth" element={user ? <Navigate to={user.role === 'admin' ? '/admin' : '/menu'} replace /> : <Auth />} />
-        <Route path="/" element={<Navigate to={user ? (user.role === 'admin' ? '/admin' : '/menu') : '/auth'} replace />} />
-        
+        <Route
+          path="/auth"
+          element={
+            user ? (
+              <Navigate
+                to={user.role === "admin" ? "/admin" : "/menu"}
+                replace
+              />
+            ) : (
+              <Auth />
+            )
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <Navigate
+              to={user ? (user.role === "admin" ? "/admin" : "/menu") : "/auth"}
+              replace
+            />
+          }
+        />
+
+        {/* 👇 NEW: route for completing registration after Google signup */}
+        <Route
+          path="/complete-registration"
+          element={<CompleteGoogleRegistration />}
+        />
+
         {/* Student Routes */}
-        <Route path="/menu" element={<ProtectedRoute><Menu /></ProtectedRoute>} />
-        <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-        <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        
+        <Route
+          path="/menu"
+          element={
+            <ProtectedRoute>
+              <Menu />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <Orders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Admin Routes */}
-        <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/menu" element={<ProtectedRoute adminOnly><AdminMenu /></ProtectedRoute>} />
-        <Route path="/admin/reports" element={<ProtectedRoute adminOnly><AdminReports /></ProtectedRoute>} />
-        <Route path="/admin/settings" element={<ProtectedRoute adminOnly><AdminSettings /></ProtectedRoute>} />
-        
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/menu"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminMenu />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminReports />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/settings"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminSettings />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

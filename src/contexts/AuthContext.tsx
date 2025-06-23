@@ -1,102 +1,140 @@
+// src/contexts/AuthContext.tsx
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { auth, db } from "../lib/firebase";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+interface AppUser {
+  uid: string;
+  email: string | null;
+  role: string;
+}
 
-interface User {
-  id: string;
-  email: string;
+interface RegisterFormData {
   name: string;
-  rollNumber?: string;
+  email: string;
+  password: string;
+  rollNumber: string;
   phoneNumber: string;
-  role: 'student' | 'admin';
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: RegisterData) => Promise<void>;
-  logout: () => void;
+  register: (data: RegisterFormData) => Promise<void>;
+  loginWithGoogle: () => Promise<"new" | "existing">;
+  completeGoogleRegistration: (rollNumber: string, phoneNumber: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
-interface RegisterData {
-  name: string;
-  email: string;
-  rollNumber: string;
-  phoneNumber: string;
-  password: string;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
+const AuthContext = createContext<AuthContextType | null>(null);
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate checking for existing session
-    const savedUser = localStorage.getItem('aceCanteenUser');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+        const role = userDoc.exists() ? userDoc.data().role : "student";
+
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          role,
+        });
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
-    setLoading(true);
-    try {
-      // Simulate login - in real app, this would call Firebase Auth
-      const mockUser: User = {
-        id: Math.random().toString(),
-        email,
-        name: email === 'admin@acecanteen.com' ? 'Admin' : 'Student User',
-        phoneNumber: '1234567890',
-        role: email === 'admin@acecanteen.com' ? 'admin' : 'student',
-        rollNumber: email === 'admin@acecanteen.com' ? undefined : 'CS2021001'
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('aceCanteenUser', JSON.stringify(mockUser));
-    } catch (error) {
-      throw new Error('Invalid credentials');
-    } finally {
-      setLoading(false);
-    }
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const register = async (userData: RegisterData) => {
-    setLoading(true);
-    try {
-      // Simulate registration
-      const newUser: User = {
-        id: Math.random().toString(),
-        ...userData,
-        role: 'student'
-      };
-      
-      setUser(newUser);
-      localStorage.setItem('aceCanteenUser', JSON.stringify(newUser));
-    } catch (error) {
-      throw new Error('Registration failed');
-    } finally {
-      setLoading(false);
-    }
+  const register = async (data: RegisterFormData) => {
+    const { email, password, name, rollNumber, phoneNumber } = data;
+
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await setDoc(doc(db, "users", cred.user.uid), {
+      email,
+      name,
+      rollNumber,
+      phoneNumber,
+      role: "student",
+      createdAt: new Date().toISOString(),
+    });
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('aceCanteenUser');
+  const loginWithGoogle = async (): Promise<"new" | "existing"> => {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const userRef = doc(db, "users", result.user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      await setDoc(userRef, {
+        email: result.user.email,
+        name: result.user.displayName,
+        phoneNumber: result.user.phoneNumber || "",
+        role: "student",
+        createdAt: new Date().toISOString(),
+      });
+      return "new";
+    }
+
+    return "existing";
+  };
+
+  const completeGoogleRegistration = async (rollNumber: string, phoneNumber : string) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("No authenticated user");
+
+    const userRef = doc(db, "users", currentUser.uid);
+    await updateDoc(userRef, { rollNumber , phoneNumber });
+  };
+
+  const logout = async () => {
+    await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        loginWithGoogle,
+        completeGoogleRegistration,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

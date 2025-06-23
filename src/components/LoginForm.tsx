@@ -6,16 +6,19 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { FaGoogle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 interface LoginFormProps {
   onToggleMode: () => void;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithGoogle, user } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,6 +31,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
         title: "Success",
         description: "Logged in successfully!",
       });
+      navigate(user?.role === "admin" ? "/admin" : "/menu");
     } catch (error) {
       toast({
         title: "Error",
@@ -45,6 +49,17 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
         <CardTitle>Welcome to ACE Canteen</CardTitle>
         <CardDescription>Sign in to your account</CardDescription>
       </CardHeader>
+      <div className='flex justify-center'>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={loginWithGoogle}
+        disabled={loading}
+        className="rounded-full flex items-center justify-center w-10 h-10 p-0"
+      >
+        <FaGoogle className="text-xl" />
+      </Button>
+      </div>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
