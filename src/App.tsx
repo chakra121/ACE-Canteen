@@ -45,6 +45,7 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
 
 const AppRoutes = () => {
   const { user } = useAuth();
+  console.log("User details", user);
 
   return (
     <div className="min-h-screen bg-background">
