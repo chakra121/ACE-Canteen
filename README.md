@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/s-sricharan/ace-canteen-central/main/public/favicon.ico" alt="Canteen Logo" width="100" />
   <h1>ACE Canteen 🍔</h1>
   <p>A modern, full-stack, real-time canteen management system built with the latest web technologies.</p>
   
@@ -17,7 +16,7 @@
 
 ## 🚀 Live Demo
 
-> [ace-canteen.vercel.app](https://ace-canteen.vercel.app/auth)
+> [ace-canteen.vercel.app](https://ace-canteen.vercel.app)
 
 ---
 
