@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -32,10 +31,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
         description: "Logged in successfully!",
       });
       navigate(userProfile.role === "admin" ? "/admin" : "/menu");
-    } catch (error: Error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Invalid email or password";
       toast({
         title: "Error",
-        description: error.message || "Invalid email or password",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -52,10 +52,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
         description: "Logged in successfully with Google!",
       });
       navigate(user.role === "admin" ? "/admin/dashboard" : "/menu");
-    } catch (error: Error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Google login failed.";
       toast({
         title: "Error",
-        description: error.message || "Google login failed.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

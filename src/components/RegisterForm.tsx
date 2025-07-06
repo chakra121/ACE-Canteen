@@ -43,10 +43,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
       });
       // All new registrations are students, so we navigate to the menu.
       navigate("/menu");
-    } catch (error: Error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Registration failed. Please try again.";
       toast({
         title: "Error",
-        description: error.message || "Registration failed. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -70,10 +71,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
       } else {
         navigate(user.role === "admin" ? "/admin/dashboard" : "/menu");
       }
-    } catch (error: Error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Google sign-in failed.";
       toast({
         title: "Error",
-        description: error.message || "Google sign-in failed.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

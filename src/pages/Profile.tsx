@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,10 +40,11 @@ const Profile = () => {
         description: "Your profile has been updated successfully.",
       });
       setIsEditing(false);
-    } catch (error: Error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to update profile.";
       toast({
         title: "Error",
-        description: error.message || "Failed to update profile.",
+        description: errorMessage,
         variant: "destructive",
       });
     }

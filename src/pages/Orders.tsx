@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,10 +48,10 @@ const Orders = () => {
     }
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | any) => {
     if (!date) return 'N/A';
-    // Convert Firestore Timestamp to Date if necessary
-    const jsDate = date.toDate ? date.toDate() : new Date(date);
+    // Handle Firestore Timestamp
+    const jsDate = typeof date.toDate === 'function' ? date.toDate() : new Date(date);
     return jsDate.toLocaleString();
   };
 

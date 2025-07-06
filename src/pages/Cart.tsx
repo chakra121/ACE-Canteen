@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -78,10 +77,11 @@ const Cart = () => {
       clearCart();
       navigate('/orders');
 
-    } catch (error: Error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to place order. Please try again.';
       toast({
         title: 'Error',
-        description: 'Failed to place order. Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

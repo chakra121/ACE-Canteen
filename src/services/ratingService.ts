@@ -1,3 +1,4 @@
+
 // src/services/ratingService.ts
 import {
   collection,
@@ -54,7 +55,12 @@ export const getMenuItemRatings = async (
   const ratingsCol = collection(db, "menuItems", menuItemId, "ratings");
   const q = query(ratingsCol);
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Rating));
+  return snapshot.docs.map((doc) => ({ 
+    userId: doc.data().userId,
+    rating: doc.data().rating,
+    createdAt: doc.data().createdAt,
+    ...doc.data()
+  } as Rating));
 };
 
 /**
