@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,11 +24,12 @@ const AdminReports = () => {
       if (data.totalOrders === 0) {
         toast({ title: 'Info', description: 'No completed orders found for the selected date.' });
       }
-    } catch (error: Error) {
+    } catch (error: unknown) {
       console.error("Failed to generate report:", error); // Detailed error logging
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.';
       toast({
         title: 'Error',
-        description: error.message || 'An unexpected error occurred.',
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {

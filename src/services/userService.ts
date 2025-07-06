@@ -1,3 +1,4 @@
+
 // src/services/userService.ts
 import { doc, getDoc, setDoc, updateDoc, collection, query, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -22,7 +23,7 @@ export const getUserProfile = async (uid: string): Promise<UserProfile | null> =
   const userRef = doc(db, 'users', uid);
   const docSnap = await getDoc(userRef);
   if (docSnap.exists()) {
-    return { id: docSnap.id, ...docSnap.data() } as UserProfile;
+    return { uid: docSnap.id, ...docSnap.data() } as UserProfile;
   }
   return null;
 };
@@ -46,5 +47,5 @@ export const getAllUserProfiles = async (): Promise<UserProfile[]> => {
   const usersCol = collection(db, 'users');
   const q = query(usersCol);
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserProfile));
+  return snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
 };
