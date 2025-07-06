@@ -70,17 +70,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
         <CardTitle>Welcome to ACE Canteen</CardTitle>
         <CardDescription>Sign in to your account</CardDescription>
       </CardHeader>
-      <div className='flex justify-center'>
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleGoogleLogin}
-        disabled={loading}
-        className="rounded-full flex items-center justify-center w-10 h-10 p-0"
-      >
-        <FaGoogle className="text-xl" />
-      </Button>
-      </div>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -106,14 +95,20 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
             />
           </div>
           <div className="text-sm text-muted-foreground">
-            <p>Demo accounts:</p>
-            <p>Admin: admin@acecanteen.com / password</p>
-            <p>Student: student@acecanteen.com / password</p>
+            <p>Admin: admin@acecanteen.com / 12345678</p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? "Signing in..." : "Sign In"}
+          </Button>
+          <Button
+            type="button"
+            onClick={handleGoogleLogin}
+            variant="outline"
+            className="w-full"
+          >
+            {loading ? "Please wait..." : "Sign in with Google"}
           </Button>
           <Button type="button" variant="ghost" onClick={onToggleMode}>
             Don't have an account? Register

@@ -57,19 +57,38 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      {/* Guest Navbar */}
+      <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <button
+              onClick={() => (window.location.href = "/")}
+              className="text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
+            >
+              ACE Canteen
+            </button>
+            <div className="flex items-center space-x-4">
+              <Button asChild variant="default" className="font-semibold">
+                <Link to="/auth">Sign In</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="text-center space-y-6">
-          <Badge variant="secondary" className="mb-4">
-            🍔 Welcome to ACE Canteen
+          <Badge variant="secondary" className="mb-2 text-2xl">
+            Welcome to ACE Canteen
           </Badge>
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
             Your Campus
             <span className="text-blue-600"> Food Hub</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-            Experience seamless food ordering with real-time tracking, diverse menu options, 
-            and a user-friendly interface designed for the modern campus lifestyle.
+            Experience seamless food ordering with real-time tracking, diverse
+            menu options, and a user-friendly interface designed for the modern
+            campus lifestyle.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
             <Button asChild size="lg" className="text-lg px-8">
@@ -87,7 +106,9 @@ const Home = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16">
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-blue-600">{stat.number}</div>
+              <div className="text-3xl md:text-4xl font-bold text-blue-600">
+                {stat.number}
+              </div>
               <div className="text-gray-600 mt-1">{stat.label}</div>
             </div>
           ))}
@@ -101,13 +122,17 @@ const Home = () => {
             Why Choose ACE Canteen?
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover the features that make our canteen management system the perfect choice for your campus.
+            Discover the features that make our canteen management system the
+            perfect choice for your campus.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
+            <Card
+              key={index}
+              className="hover:shadow-lg transition-shadow duration-300"
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                   <feature.icon className="h-6 w-6 text-blue-600" />
@@ -128,7 +153,7 @@ const Home = () => {
       <section className="container mx-auto px-4 py-16 bg-gray-50">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            How It Works
+            How It Works?
           </h2>
           <p className="text-lg text-gray-600">
             Simple steps to get your favorite food
@@ -142,7 +167,8 @@ const Home = () => {
             </div>
             <h3 className="text-xl font-semibold mb-2">Browse Menu</h3>
             <p className="text-gray-600">
-              Explore our diverse menu with detailed descriptions, images, and prices.
+              Explore our diverse menu with detailed descriptions, images, and
+              prices.
             </p>
           </div>
           <div className="text-center">
@@ -151,7 +177,8 @@ const Home = () => {
             </div>
             <h3 className="text-xl font-semibold mb-2">Place Order</h3>
             <p className="text-gray-600">
-              Add items to cart, choose dine-in or takeaway, and confirm your order.
+              Add items to cart, choose dine-in or takeaway, and confirm your
+              order.
             </p>
           </div>
           <div className="text-center">
@@ -178,21 +205,27 @@ const Home = () => {
                 <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold">Fast & Convenient</h3>
-                  <p className="text-gray-600">Quick ordering process designed for busy student schedules.</p>
+                  <p className="text-gray-600">
+                    Quick ordering process designed for busy student schedules.
+                  </p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
                 <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold">Real-time Updates</h3>
-                  <p className="text-gray-600">Stay informed about your order status and pickup times.</p>
+                  <p className="text-gray-600">
+                    Stay informed about your order status and pickup times.
+                  </p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
                 <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold">Secure Payments</h3>
-                  <p className="text-gray-600">Multiple payment options with secure transaction processing.</p>
+                  <p className="text-gray-600">
+                    Multiple payment options with secure transaction processing.
+                  </p>
                 </div>
               </div>
             </div>
@@ -200,11 +233,12 @@ const Home = () => {
           <div className="relative">
             <div className="bg-gradient-to-r from-blue-400 to-blue-600 rounded-2xl p-8 text-white text-center">
               <h3 className="text-2xl font-bold mb-4">Ready to Order?</h3>
-              <p className="mb-6">Join hundreds of students who trust ACE Canteen for their daily meals.</p>
+              <p className="mb-6">
+                Join hundreds of students who trust ACE Canteen for their daily
+                meals.
+              </p>
               <Button asChild variant="secondary" size="lg">
-                <Link to="/auth">
-                  Start Ordering Now
-                </Link>
+                <Link to="/auth">Start Ordering Now</Link>
               </Button>
             </div>
           </div>
@@ -219,14 +253,10 @@ const Home = () => {
             <p className="text-gray-400 mb-6">
               Your campus food hub - making dining convenient and enjoyable.
             </p>
-            <div className="flex justify-center space-x-6">
-              <Button asChild variant="ghost" className="text-white hover:text-blue-400">
-                <Link to="/auth">Login</Link>
-              </Button>
-              <Button asChild variant="ghost" className="text-white hover:text-blue-400">
-                <Link to="/auth">Sign Up</Link>
-              </Button>
-            </div>
+            
+              <p className="text-sm">
+                © {new Date().getFullYear()} ACE Canteen. All rights reserved.
+              </p>
           </div>
         </div>
       </footer>
