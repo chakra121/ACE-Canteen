@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import Auth from "./pages/Auth";
+import Home from "./pages/Home";
 import Menu from "./pages/Menu";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
@@ -51,6 +51,7 @@ const AppRoutes = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route
           path="/auth"
           element={
@@ -62,15 +63,6 @@ const AppRoutes = () => {
             ) : (
               <Auth />
             )
-          }
-        />
-        <Route
-          path="/"
-          element={
-            <Navigate
-              to={user ? (user.role === "admin" ? "/admin" : "/menu") : "/auth"}
-              replace
-            />
           }
         />
 
