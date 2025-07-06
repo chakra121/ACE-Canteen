@@ -1,6 +1,6 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/s-sricharan/ace-canteen-central/main/public/favicon.ico" alt="Canteen Logo" width="100" />
-  <h1>ACE Canteen Central 🍔</h1>
+  <h1>ACE Canteen 🍔</h1>
   <p>A modern, full-stack, real-time canteen management system built with the latest web technologies.</p>
   
   <!-- Badges -->
@@ -19,13 +19,13 @@
 
 > **Paste your deployment link here!**
 >
-> [**[Your Live Site URL]**](https://your-deployment-link.com)
+> [**[ace-canteen.vercel.app]**](https://ace-canteen.vercel.app/auth)
 
 ---
 
 ## ✨ Key Features
 
-ACE Canteen Central provides a seamless experience for both students and administrators, with a rich set of features tailored for a modern campus canteen.
+ACE Canteen provides a seamless experience for both students and administrators, with a rich set of features tailored for a modern campus canteen.
 
 ### 👨‍🎓 For Students
 
@@ -129,24 +129,6 @@ To get a local copy up and running, follow these simple steps.
     ```sh
     npm run dev
     ```
-    The application should now be running on `http://localhost:5173` (or another port if 5173 is busy).
+    The application should now be running on `http://localhost:8080` .
 
 ---
-
-## 🤝 Contributing
-
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
-
----
-
-<div align="center">
-  <p>Made with ❤️ by the community.</p>
-</div>
