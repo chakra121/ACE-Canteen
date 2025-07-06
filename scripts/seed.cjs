@@ -1,6 +1,16 @@
-import { MenuItem } from '../types';
+// scripts/seed.cjs
+const admin = require('firebase-admin');
+const serviceAccount = require('../config/firebase-admin-credentials.json');
 
-export const menuCategories = [
+// Initialize Firebase Admin SDK
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
+
+// Data to seed (ensure this matches your MenuItem and MenuCategory types)
+const menuCategories = [
   'Breakfast',
   'Lunch',
   'Snacks',
@@ -8,7 +18,7 @@ export const menuCategories = [
   'Desserts'
 ];
 
-export const mockMenuItems: Omit<MenuItem, 'avgRating' | 'scheduledAvailability'>[] = [
+const mockMenuItems = [
   // Breakfast
   {
     id: '1',
@@ -159,3 +169,73 @@ export const mockMenuItems: Omit<MenuItem, 'avgRating' | 'scheduledAvailability'
     inStock: true,
   }
 ];
+
+async function seedDatabase() {
+  console.log('Starting database seeding...');
+
+  // --- Clear existing data (optional, but good for fresh seeding) ---
+  console.log('Clearing existing categories and menu items...');
+  const categoriesRef = db.collection('categories');
+  const menuItemsRef = db.collection('menuItems');
+
+  let deleteBatch = db.batch();
+  const existingCategories = await categoriesRef.get();
+  existingCategories.forEach((d) => {
+    deleteBatch.delete(d.ref);
+  });
+
+  const existingMenuItems = await menuItemsRef.get();
+  existingMenuItems.forEach((d) => {
+    deleteBatch.delete(d.ref);
+  });
+
+  await deleteBatch.commit();
+  console.log('Existing data cleared.');
+
+  // --- Seed Categories ---
+  console.log('Seeding categories...');
+  let categoryBatch = db.batch(); // New batch for categories
+  const categoryMap = {}; // Map category name to its Firestore ID
+
+  for (const categoryName of menuCategories) {
+    const newCategoryRef = categoriesRef.doc(); // Create a new document reference with an auto-generated ID
+    categoryBatch.set(newCategoryRef, { name: categoryName });
+    categoryMap[categoryName] = newCategoryRef.id;
+    console.log(`Added category: ${categoryName} with ID: ${newCategoryRef.id}`);
+  }
+  await categoryBatch.commit(); // Commit category additions
+  console.log('Categories seeded.');
+
+  // --- Seed Menu Items ---
+  console.log('Seeding menu items...');
+  let menuItemsBatch = db.batch(); // New batch for menu items
+
+  for (const item of mockMenuItems) {
+    const categoryId = categoryMap[item.categoryId]; // Get the Firestore ID for the category
+
+    if (!categoryId) {
+      console.warn(`Category ID not found for category: ${item.categoryId}. Skipping item: ${item.name}`);
+      continue;
+    }
+
+    const menuItemData = {
+      name: item.name,
+      price: item.price,
+      ingredients: item.ingredients,
+      imageUrl: item.imageUrl,
+      isVegetarian: item.isVegetarian,
+      inStock: item.inStock,
+      categoryId: categoryId,
+    };
+
+    const newMenuItemRef = menuItemsRef.doc(); // Create a new document reference with an auto-generated ID
+    menuItemsBatch.set(newMenuItemRef, menuItemData);
+    console.log(`Added menu item: ${item.name} to category ID: ${categoryId}`);
+  }
+  await menuItemsBatch.commit(); // Commit menu item additions
+  console.log('Menu items seeded.');
+
+  console.log('Database seeding complete!');
+}
+
+seedDatabase().catch(console.error);

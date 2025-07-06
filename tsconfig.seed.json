@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "ESNext",
+    "target": "ES2020",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": false,
+    "jsx": "react-jsx" // Ensure JSX is handled for any imported UI components
+  },
+  "include": ["src/lib/seed.ts", "src/data/menuData.ts", "src/types/index.ts"]
+}

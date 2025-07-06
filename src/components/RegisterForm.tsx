@@ -36,16 +36,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
     setLoading(true);
 
     try {
-      await register(formData);
+      const userProfile = await register(formData);
       toast({
         title: "Success",
         description: "Account created successfully!",
       });
-      navigate(user?.role === "admin" ? "/admin" : "/menu");
-    } catch (error) {
+      // All new registrations are students, so we navigate to the menu.
+      navigate("/menu");
+    } catch (error: Error) {
       toast({
         title: "Error",
-        description: "Registration failed. Please try again.",
+        description: error.message || "Registration failed. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -56,7 +57,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
   const handleGoogleSignup = async () => {
     setLoading(true);
     try {
-      const status = await loginWithGoogle();
+      const { status, user } = await loginWithGoogle();
       toast({
         title: "Google Sign-In Success",
         description: status === 'new'
@@ -65,14 +66,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
       });
 
       if (status === "new") {
-        navigate("/complete-registration");
+        navigate("/complete-google-registration");
       } else {
-        navigate(user?.role === "admin" ? "/admin" : "/menu");
+        navigate(user.role === "admin" ? "/admin/dashboard" : "/menu");
       }
-    } catch (error) {
+    } catch (error: Error) {
       toast({
         title: "Error",
-        description: "Google sign-in failed.",
+        description: error.message || "Google sign-in failed.",
         variant: "destructive",
       });
     } finally {

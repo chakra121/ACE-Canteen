@@ -9,14 +9,17 @@ import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { placeOrder } from '@/services/orderService';
+import { OrderItem } from '@/types';
 
 const Cart = () => {
   const { items, updateQuantity, removeFromCart, clearCart, total } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [orderType, setOrderType] = useState('dine-in');
-  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [orderType, setOrderType] = useState<'Dine-In' | 'Take Away'>('Dine-In');
+  const [paymentMethod, setPaymentMethod] = useState<'Cash' | 'Online'>('Cash');
+  const [loading, setLoading] = useState(false);
 
   const tax = total * 0.05; // 5% tax
   const finalTotal = total + tax;
@@ -29,49 +32,61 @@ const Cart = () => {
     updateQuantity(itemId, newQuantity);
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
+    if (!user) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to place an order.',
+        variant: 'destructive',
+      });
+      navigate('/auth');
+      return;
+    }
+
     if (items.length === 0) {
       toast({
-        title: "Cart is empty",
-        description: "Please add items to your cart before checkout.",
-        variant: "destructive",
+        title: 'Cart is empty',
+        description: 'Please add items to your cart before checkout.',
+        variant: 'destructive',
       });
       return;
     }
 
-    // Create order
-    const order = {
-      id: Math.random().toString(),
-      userId: user?.id,
-      items: items,
-      total: finalTotal,
-      orderType,
-      paymentMethod,
-      status: 'Order Placed',
-      createdAt: new Date().toISOString()
-    };
+    setLoading(true);
 
-    // Save to localStorage (in real app, this would be saved to database)
-    const existingOrders = JSON.parse(localStorage.getItem('aceCanteenOrders') || '[]');
-    existingOrders.push(order);
-    localStorage.setItem('aceCanteenOrders', JSON.stringify(existingOrders));
+    const orderItems: OrderItem[] = items.map(item => ({
+      menuItemId: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+    }));
 
-    // Simulate payment processing for online payment
-    if (paymentMethod === 'online') {
-      // In real app, this would integrate with Razorpay
-      toast({
-        title: "Payment Successful",
-        description: "Your order has been placed successfully!",
+    try {
+      await placeOrder({
+        userId: user.uid,
+        items: orderItems,
+        totalAmount: finalTotal,
+        orderType,
+        paymentMethod,
       });
-    } else {
+
       toast({
-        title: "Order Placed",
-        description: "Your order has been placed successfully! Pay at the counter.",
+        title: 'Order Placed Successfully!',
+        description: 'You can track its status on the Orders page.',
       });
+
+      clearCart();
+      navigate('/orders');
+
+    } catch (error: Error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to place order. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
     }
-
-    clearCart();
-    navigate('/orders');
   };
 
   if (items.length === 0) {
@@ -104,7 +119,7 @@ const Cart = () => {
               {items.map(item => (
                 <div key={item.id} className="flex items-center space-x-4 border-b pb-4">
                   <img
-                    src={item.image}
+                    src={item.imageUrl}
                     alt={item.name}
                     className="w-16 h-16 object-cover rounded"
                   />
@@ -133,7 +148,7 @@ const Cart = () => {
                   </div>
                   
                   <div className="text-right">
-                    <p className="font-semibold">₹{item.price * item.quantity}</p>
+                    <p className="font-semibold">₹{(item.price * item.quantity).toFixed(2)}</p>
                   </div>
                   
                   <Button
@@ -151,49 +166,40 @@ const Cart = () => {
 
         {/* Order Summary */}
         <div className="space-y-6">
-          {/* Order Type */}
           <Card>
-            <CardHeader>
-              <CardTitle>Order Type</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Order Type</CardTitle></CardHeader>
             <CardContent>
-              <RadioGroup value={orderType} onValueChange={setOrderType}>
+              <RadioGroup value={orderType} onValueChange={(v: 'Dine-In' | 'Take Away') => setOrderType(v)}>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="dine-in" id="dine-in" />
+                  <RadioGroupItem value="Dine-In" id="dine-in" />
                   <Label htmlFor="dine-in">Dine In</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="take-away" id="take-away" />
+                  <RadioGroupItem value="Take Away" id="take-away" />
                   <Label htmlFor="take-away">Take Away</Label>
                 </div>
               </RadioGroup>
             </CardContent>
           </Card>
 
-          {/* Payment Method */}
           <Card>
-            <CardHeader>
-              <CardTitle>Payment Method</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Payment Method</CardTitle></CardHeader>
             <CardContent>
-              <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+              <RadioGroup value={paymentMethod} onValueChange={(v: 'Cash' | 'Online') => setPaymentMethod(v)}>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="cash" id="cash" />
+                  <RadioGroupItem value="Cash" id="cash" />
                   <Label htmlFor="cash">Cash</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="online" id="online" />
-                  <Label htmlFor="online">Online Payment (Razorpay)</Label>
+                  <RadioGroupItem value="Online" id="online" disabled />
+                  <Label htmlFor="online">Online Payment (Coming Soon)</Label>
                 </div>
               </RadioGroup>
             </CardContent>
           </Card>
 
-          {/* Order Summary */}
           <Card>
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Order Summary</CardTitle></CardHeader>
             <CardContent className="space-y-2">
               <div className="flex justify-between">
                 <span>Subtotal</span>
@@ -208,8 +214,8 @@ const Cart = () => {
                 <span>₹{finalTotal.toFixed(2)}</span>
               </div>
               
-              <Button onClick={handleCheckout} className="w-full mt-4" size="lg">
-                {paymentMethod === 'online' ? 'Pay Now' : 'Place Order'}
+              <Button onClick={handleCheckout} className="w-full mt-4" size="lg" disabled={loading}>
+                {loading ? 'Placing Order...' : 'Place Order'}
               </Button>
             </CardContent>
           </Card>

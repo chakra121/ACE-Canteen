@@ -1,17 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-export interface MenuItem {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  image: string;
-  ingredients: string[];
-  isVeg: boolean;
-  inStock: boolean;
-  rating?: number;
-}
+import { MenuItem } from '@/types';
 
 export interface CartItem extends MenuItem {
   quantity: number;

@@ -1,0 +1,56 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can read/write their own data. Admins can read anyone's data.
+    // A user's role is stored in the 'role' field of their user document.
+    function isUser(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /users/{userId} {
+      allow read: if isUser(userId) || isAdmin();
+      allow create: if request.auth.uid != null;
+      allow update: if isUser(userId);
+      // Deleting user accounts should be handled carefully, perhaps in a Cloud Function.
+      allow delete: if false;
+    }
+
+    // Anyone can read categories. Only admins can write to them.
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Anyone can read menu items that are in stock. Only admins can write.
+    match /menuItems/{menuItemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      // Logged-in users can rate an item.
+      match /ratings/{userId} {
+        allow read: if true;
+        allow create, update: if isUser(userId);
+      }
+    }
+
+    // Users can create their own orders and read them. Admins can read/update all orders.
+    match /orders/{orderId} {
+      allow create: if request.auth.uid == request.resource.data.userId;
+      allow read: if isUser(resource.data.userId) || isAdmin();
+      // Only admins can update order status.
+      allow update: if isAdmin();
+    }
+
+    // Anyone can read the canteen settings. Only admins can change them.
+    match /settings/canteen {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

@@ -1,14 +1,22 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { getCanteenSettings, updateCanteenSettings } from '@/services/settingsService';
+import { CanteenSettings } from '@/types';
 
 const AdminSettings = () => {
-  const [settings, setSettings] = useState({
+  const defaultSettings: CanteenSettings & {
+    canteenName: string;
+    isOpen: boolean;
+    taxRate: number;
+    deliveryFee: number;
+    minimumOrderAmount: number;
+    orderPreparationTime: number;
+  } = {
     canteenName: 'ACE Canteen',
     openingTime: '08:00',
     closingTime: '20:00',
@@ -17,38 +25,71 @@ const AdminSettings = () => {
     deliveryFee: 0,
     minimumOrderAmount: 50,
     orderPreparationTime: 15
-  });
+  };
 
+  const [settings, setSettings] = useState(defaultSettings);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const handleChange = (field: string, value: any) => {
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const fetchedSettings = await getCanteenSettings();
+        if (fetchedSettings) {
+          setSettings(prev => ({ ...prev, ...fetchedSettings }));
+        }
+      } catch (error) {
+        toast({ title: 'Error', description: 'Failed to load canteen settings.', variant: 'destructive' });
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadSettings();
+  }, [toast]);
+
+  const handleChange = (field: keyof typeof settings, value: string | number | boolean) => {
     setSettings(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const handleSave = () => {
-    // In real app, this would save to database
-    localStorage.setItem('aceCanteenSettings', JSON.stringify(settings));
-    toast({
-      title: "Settings Saved",
-      description: "Canteen settings have been updated successfully.",
-    });
+  const handleSave = async () => {
+    try {
+      await updateCanteenSettings(settings);
+      toast({
+        title: "Settings Saved",
+        description: "Canteen settings have been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save settings.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleReset = () => {
-    setSettings({
-      canteenName: 'ACE Canteen',
-      openingTime: '08:00',
-      closingTime: '20:00',
-      isOpen: true,
-      taxRate: 5,
-      deliveryFee: 0,
-      minimumOrderAmount: 50,
-      orderPreparationTime: 15
-    });
+  const handleReset = async () => {
+    setSettings(defaultSettings);
+    try {
+      await updateCanteenSettings(defaultSettings);
+      toast({
+        title: "Settings Reset",
+        description: "Canteen settings have been reset to defaults.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to reset settings.",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (loading) {
+    return <div className="text-center py-12">Loading settings...</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

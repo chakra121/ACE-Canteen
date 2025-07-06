@@ -26,16 +26,36 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
     setLoading(true);
 
     try {
-      await login(email, password);
+      const userProfile = await login(email, password);
       toast({
         title: "Success",
         description: "Logged in successfully!",
       });
-      navigate(user?.role === "admin" ? "/admin" : "/menu");
-    } catch (error) {
+      navigate(userProfile.role === "admin" ? "/admin" : "/menu");
+    } catch (error: Error) {
       toast({
         title: "Error",
-        description: "Invalid email or password",
+        description: error.message || "Invalid email or password",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      const { user } = await loginWithGoogle();
+      toast({
+        title: "Success",
+        description: "Logged in successfully with Google!",
+      });
+      navigate(user.role === "admin" ? "/admin/dashboard" : "/menu");
+    } catch (error: Error) {
+      toast({
+        title: "Error",
+        description: error.message || "Google login failed.",
         variant: "destructive",
       });
     } finally {
@@ -53,7 +73,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
       <Button
         type="button"
         variant="outline"
-        onClick={loginWithGoogle}
+        onClick={handleGoogleLogin}
         disabled={loading}
         className="rounded-full flex items-center justify-center w-10 h-10 p-0"
       >

@@ -1,7 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { mockMenuItems, menuCategories } from '@/data/menuData';
-import { MenuItem } from '@/contexts/CartContext';
+import {
+  getMenuItems,
+  addMenuItem,
+  updateMenuItem,
+  deleteMenuItem,
+  getCategories,
+  addCategory,
+} from '@/services/adminMenuService';
+import { MenuItem, MenuCategory } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +21,8 @@ import { Plus, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminMenu = () => {
-  const [items, setItems] = useState<MenuItem[]>(mockMenuItems);
+  const [items, setItems] = useState<MenuItem[]>([]);
+  const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
@@ -23,41 +31,50 @@ const AdminMenu = () => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    category: '',
-    image: '',
+    categoryId: '',
+    imageUrl: '',
     ingredients: '',
-    isVeg: true,
-    inStock: true
+    isVegetarian: true,
+    inStock: true,
   });
 
+  // This would typically be managed in a separate admin section for images
   const availableImages = [
     'https://images.unsplash.com/photo-1630383249896-424e482df921?w=300',
     'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=300',
     'https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=300',
-    'https://images.unsplash.com/photo-1563379091339-03246963d96c?w=300',
-    'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=300',
-    'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300',
-    'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=300',
-    'https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=300',
-    'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=300',
-    'https://images.unsplash.com/photo-1553979459-d2229ba7433a?w=300',
-    'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=300',
-    'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=300'
   ];
 
-  const filteredItems = items.filter(item => 
-    selectedCategory === 'All' || item.category === selectedCategory
+  const fetchData = useCallback(async () => {
+    try {
+      const [menuItems, menuCategories] = await Promise.all([
+        getMenuItems(),
+        getCategories(),
+      ]);
+      setItems(menuItems);
+      setCategories(menuCategories);
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to fetch data.', variant: 'destructive' });
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const filteredItems = items.filter(item =>
+    selectedCategory === 'All' || item.categoryId === selectedCategory
   );
 
   const resetForm = () => {
     setFormData({
       name: '',
       price: '',
-      category: '',
-      image: '',
+      categoryId: '',
+      imageUrl: '',
       ingredients: '',
-      isVeg: true,
-      inStock: true
+      isVegetarian: true,
+      inStock: true,
     });
     setEditingItem(null);
   };
@@ -67,62 +84,75 @@ const AdminMenu = () => {
     setFormData({
       name: item.name,
       price: item.price.toString(),
-      category: item.category,
-      image: item.image,
-      ingredients: item.ingredients.join(', '),
-      isVeg: item.isVeg,
-      inStock: item.inStock
+      categoryId: item.categoryId,
+      imageUrl: item.imageUrl,
+      ingredients: Array.isArray(item.ingredients) ? item.ingredients.join(', ') : '',
+      isVegetarian: item.isVegetarian,
+      inStock: item.inStock,
     });
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const newItem: MenuItem = {
-      id: editingItem?.id || Math.random().toString(),
-      name: formData.name,
-      price: parseFloat(formData.price),
-      category: formData.category,
-      image: formData.image,
-      ingredients: formData.ingredients.split(',').map(ing => ing.trim()),
-      isVeg: formData.isVeg,
-      inStock: formData.inStock,
-      rating: editingItem?.rating || 4.0
-    };
+    try {
+      const itemData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        ingredients: formData.ingredients.split(',').map(ing => ing.trim()),
+      };
 
-    if (editingItem) {
-      setItems(prev => prev.map(item => item.id === editingItem.id ? newItem : item));
-      toast({
-        title: "Item updated",
-        description: "Menu item has been updated successfully.",
-      });
-    } else {
-      setItems(prev => [...prev, newItem]);
-      toast({
-        title: "Item added",
-        description: "New menu item has been added successfully.",
-      });
+      if (editingItem) {
+        await updateMenuItem(editingItem.id, itemData);
+        toast({ title: 'Success', description: 'Menu item updated.' });
+      } else {
+        await addMenuItem(itemData as Omit<MenuItem, 'id'>);
+        toast({ title: 'Success', description: 'New menu item added.' });
+      }
+      
+      fetchData(); // Refresh data
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to save item.', variant: 'destructive' });
     }
-
-    setIsDialogOpen(false);
-    resetForm();
   };
 
-  const handleDelete = (itemId: string) => {
-    setItems(prev => prev.filter(item => item.id !== itemId));
-    toast({
-      title: "Item deleted",
-      description: "Menu item has been deleted successfully.",
-    });
+  const handleDelete = async (itemId: string) => {
+    try {
+      await deleteMenuItem(itemId);
+      toast({ title: 'Success', description: 'Menu item deleted.' });
+      fetchData();
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to delete item.', variant: 'destructive' });
+    }
   };
 
-  const toggleStock = (itemId: string) => {
-    setItems(prev => prev.map(item => 
-      item.id === itemId ? { ...item, inStock: !item.inStock } : item
-    ));
+  const toggleStock = async (item: MenuItem) => {
+    try {
+      await updateMenuItem(item.id, { inStock: !item.inStock });
+      toast({ title: 'Success', description: 'Stock status updated.' });
+      fetchData();
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to update stock.', variant: 'destructive' });
+    }
   };
-
+  
+  // A simple handler to add a new category for demonstration
+  const handleAddCategory = async (name: string) => {
+    if (!name || categories.some(c => c.name === name)) {
+      toast({ title: 'Info', description: 'Category already exists or name is empty.' });
+      return;
+    }
+    try {
+      await addCategory(name);
+      toast({ title: 'Success', description: `Category '${name}' added.` });
+      fetchData();
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to add category.', variant: 'destructive' });
+    }
+  };
+  
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -140,38 +170,25 @@ const AdminMenu = () => {
             </DialogHeader>
             
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Form fields remain largely the same, but bindings are updated */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    required
-                  />
+                  <Input id="name" value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} required />
                 </div>
-                
                 <div className="space-y-2">
                   <Label htmlFor="price">Price (₹)</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                    required
-                  />
+                  <Input id="price" type="number" value={formData.price} onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))} required />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
-                <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
+                <Select value={formData.categoryId} onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}>
+                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
                   <SelectContent>
-                    {menuCategories.map(category => (
-                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    {categories.map(category => (
+                      <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -179,16 +196,14 @@ const AdminMenu = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="image">Image</Label>
-                <Select value={formData.image} onValueChange={(value) => setFormData(prev => ({ ...prev, image: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select image" />
-                  </SelectTrigger>
+                <Select value={formData.imageUrl} onValueChange={(value) => setFormData(prev => ({ ...prev, imageUrl: value }))}>
+                  <SelectTrigger><SelectValue placeholder="Select image" /></SelectTrigger>
                   <SelectContent>
-                    {availableImages.map((imageUrl, index) => (
+                    {availableImages.map((imageUrl) => (
                       <SelectItem key={imageUrl} value={imageUrl}>
                         <div className="flex items-center space-x-2">
-                          <img src={imageUrl} alt={`Option ${index + 1}`} className="w-8 h-8 rounded" />
-                          <span>Image {index + 1}</span>
+                          <img src={imageUrl} alt="Menu item" className="w-8 h-8 rounded" />
+                          <span>{imageUrl.split('/').pop()?.split('?')[0]}</span>
                         </div>
                       </SelectItem>
                     ))}
@@ -198,40 +213,23 @@ const AdminMenu = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="ingredients">Ingredients (comma separated)</Label>
-                <Input
-                  id="ingredients"
-                  value={formData.ingredients}
-                  onChange={(e) => setFormData(prev => ({ ...prev, ingredients: e.target.value }))}
-                  placeholder="Rice, Dal, Spices..."
-                  required
-                />
+                <Input id="ingredients" value={formData.ingredients} onChange={(e) => setFormData(prev => ({ ...prev, ingredients: e.target.value }))} required />
               </div>
 
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={formData.isVeg}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isVeg: checked }))}
-                  />
+                  <Switch checked={formData.isVegetarian} onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isVegetarian: checked }))} />
                   <Label>Vegetarian</Label>
                 </div>
-                
                 <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={formData.inStock}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, inStock: checked }))}
-                  />
+                  <Switch checked={formData.inStock} onCheckedChange={(checked) => setFormData(prev => ({ ...prev, inStock: checked }))} />
                   <Label>In Stock</Label>
                 </div>
               </div>
 
               <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {editingItem ? 'Update Item' : 'Add Item'}
-                </Button>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                <Button type="submit">{editingItem ? 'Update Item' : 'Add Item'}</Button>
               </div>
             </form>
           </DialogContent>
@@ -240,19 +238,10 @@ const AdminMenu = () => {
 
       {/* Category Filter */}
       <div className="flex flex-wrap gap-2 mb-6">
-        <Button
-          variant={selectedCategory === 'All' ? 'default' : 'outline'}
-          onClick={() => setSelectedCategory('All')}
-        >
-          All
-        </Button>
-        {menuCategories.map(category => (
-          <Button
-            key={category}
-            variant={selectedCategory === category ? 'default' : 'outline'}
-            onClick={() => setSelectedCategory(category)}
-          >
-            {category}
+        <Button variant={selectedCategory === 'All' ? 'default' : 'outline'} onClick={() => setSelectedCategory('All')}>All</Button>
+        {categories.map(category => (
+          <Button key={category.id} variant={selectedCategory === category.id ? 'default' : 'outline'} onClick={() => setSelectedCategory(category.id)}>
+            {category.name}
           </Button>
         ))}
       </div>
@@ -262,53 +251,36 @@ const AdminMenu = () => {
         {filteredItems.map(item => (
           <Card key={item.id} className="overflow-hidden">
             <div className="relative">
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-48 object-cover"
-              />
+              <img src={item.imageUrl} alt={item.name} className="w-full h-48 object-cover" />
               <div className="absolute top-2 right-2">
-                <Badge variant={item.isVeg ? 'default' : 'destructive'}>
-                  <div className={`w-2 h-2 rounded-full mr-1 ${item.isVeg ? 'bg-green-500' : 'bg-red-500'}`} />
-                  {item.isVeg ? 'Veg' : 'Non-Veg'}
+                <Badge variant={item.isVegetarian ? 'default' : 'destructive'}>
+                  <div className={`w-2 h-2 rounded-full mr-1 ${item.isVegetarian ? 'bg-green-500' : 'bg-red-500'}`} />
+                  {item.isVegetarian ? 'Veg' : 'Non-Veg'}
                 </Badge>
               </div>
               <div className="absolute top-2 left-2">
-                <Badge variant={item.inStock ? 'default' : 'secondary'}>
-                  {item.inStock ? 'In Stock' : 'Out of Stock'}
-                </Badge>
+                <Badge variant={item.inStock ? 'default' : 'secondary'}>{item.inStock ? 'In Stock' : 'Out of Stock'}</Badge>
               </div>
             </div>
-            
             <CardHeader>
               <CardTitle className="text-lg">{item.name}</CardTitle>
               <div className="text-lg font-semibold text-primary">₹{item.price}</div>
             </CardHeader>
-            
             <CardContent>
               <p className="text-sm text-gray-600 mb-3">
-                <strong>Category:</strong> {item.category}
+                <strong>Category:</strong> {categories.find(c => c.id === item.categoryId)?.name || 'N/A'}
               </p>
               <p className="text-sm text-gray-600 mb-4">
-                <strong>Ingredients:</strong> {item.ingredients.join(', ')}
+                <strong>Ingredients:</strong> {Array.isArray(item.ingredients) ? item.ingredients.join(', ') : ''}
               </p>
-              
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={item.inStock}
-                    onCheckedChange={() => toggleStock(item.id)}
-                  />
+                  <Switch checked={item.inStock} onCheckedChange={() => toggleStock(item)} />
                   <span className="text-sm">In Stock</span>
                 </div>
-                
                 <div className="flex space-x-1">
-                  <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDelete(item.id)}>
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleEdit(item)}><Edit className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDelete(item.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                 </div>
               </div>
             </CardContent>
