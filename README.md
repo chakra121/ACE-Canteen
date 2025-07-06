@@ -17,9 +17,7 @@
 
 ## 🚀 Live Demo
 
-> **Paste your deployment link here!**
->
-> [**[ace-canteen.vercel.app]**](https://ace-canteen.vercel.app/auth)
+> [ace-canteen.vercel.app](https://ace-canteen.vercel.app/auth)
 
 ---
 
@@ -38,7 +36,7 @@ ACE Canteen provides a seamless experience for both students and administrators,
 *   **👤 Profile Management:** Easily manage your personal information.
 *   **🔐 Secure Authentication:** Safe and secure login with email/password or Google.
 
-### 👑 For Admins
+### 👑 For Admin
 
 *   **📈 At-a-Glance Dashboard:** A comprehensive dashboard showing key metrics like **Today's Revenue**, all-time revenue, total orders, and pending orders.
 *   **📋 Full Menu Control (CRUD):** Add, edit, and delete menu items and categories with ease.
